@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NOTAKU — Kasir & Stok</title>
+<style>
+:root{--blue:#2563eb;--navy:#15386b;--bg:#f2f6fc;--ink:#172b4d;--muted:#64748b;--line:#dce5f1;--white:#fff;--red:#b91c1c;--green:#15803d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Arial,sans-serif}
+header{background:linear-gradient(135deg,#15386b,#3182f6);color:white;padding:22px 16px 30px}header,main{max-width:900px;margin:auto}body>header{max-width:none}.head{max-width:900px;margin:auto}.brand{font-size:26px;font-weight:850;letter-spacing:.5px}.tag{opacity:.9;margin-top:4px}
+main{padding:0 13px 35px;margin-top:-14px}.nav{display:flex;gap:8px;overflow:auto;margin-bottom:13px}.tab{white-space:nowrap;background:#e2ebfb;color:#214577}.tab.active{background:var(--blue);color:white}
+.card{background:white;border-radius:16px;padding:17px;margin:0 0 14px;box-shadow:0 4px 16px #173b7010}.card h2{font-size:18px;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field label{display:block;font-size:12px;font-weight:750;margin-bottom:6px;color:#425674}
+input,select{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;padding:11px 10px;font:inherit;background:white;color:var(--ink)}input:focus,select:focus{outline:2px solid #bfdbfe;border-color:var(--blue)}
+button{border:0;border-radius:10px;padding:11px 13px;font:inherit;font-weight:700;cursor:pointer;background:#e8effb;color:#214577}.primary{background:var(--blue);color:white}.danger{background:#fee2e2;color:var(--red)}.green{background:#dcfce7;color:#166534}.full{width:100%}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions>*{flex:1}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:14px}.stat{background:white;padding:13px;border-radius:13px;box-shadow:0 3px 12px #173b7008}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{display:block;font-size:18px;margin-top:5px;overflow-wrap:anywhere}
+.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-size:11px;text-transform:uppercase}.badge{display:inline-block;border-radius:99px;padding:4px 8px;font-size:11px;font-weight:800}.ok{background:#dcfce7;color:#166534}.low{background:#fef3c7;color:#92400e}.out{background:#fee2e2;color:#991b1b}.muted{color:var(--muted);font-size:12px}.hidden{display:none!important}.money{font-weight:800;color:var(--navy)}.summary{background:#edf4ff;border-radius:12px;padding:14px;margin-top:12px}.sumline{display:flex;justify-content:space-between;gap:12px;margin:7px 0}.big{font-size:20px;font-weight:850;border-top:1px solid #cbdcf8;padding-top:10px;margin-top:10px}
+.product-row{display:grid;grid-template-columns:minmax(0,1fr) 82px 100px;gap:8px;align-items:end;margin:10px 0;padding:11px;border:1px solid var(--line);border-radius:12px}.product-row .field{min-width:0}.notice{padding:11px;border-radius:10px;background:#fff7ed;color:#9a3412;font-size:13px;margin:10px 0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:8px 15px 25px}
+@media(max-width:520px){.grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:repeat(3,1fr)}.stat strong{font-size:15px}.card{padding:14px}.product-row{grid-template-columns:minmax(0,1fr) 72px}.product-row .price-label{grid-column:1/-1}.product-row .price-label input{max-width:180px}}
+@media print{body{background:white}header,.nav,.no-print,footer{display:none!important}main{margin:0;padding:0;max-width:none}.card{box-shadow:none;border-radius:0;padding:0}.print-only{display:block!important}#saleView{display:block!important}#stockView,#historyView,#settingsView{display:none!important}input{border:0;padding:2px}.product-row{border:0;padding:5px 0}button{display:none!important}}
+</style>
+</head>
+<body>
+<header><div class="head"><div class="brand">💙 NOTAKU</div><div class="tag">Kasir, nota & pengelolaan stok barang</div></div></header>
+<main>
+<div class="nav no-print">
+<button class="tab active" data-tab="saleView">🧾 Kasir / Nota</button>
+<button class="tab" data-tab="stockView">📦 Stok Barang</button>
+<button class="tab" data-tab="historyView">📚 Riwayat</button>
+<button class="tab" data-tab="settingsView">⚙️ Toko</button>
+</div>
+<section id="saleView">
+<div class="stats">
+<div class="stat"><small>Jenis barang</small><strong id="statKinds">0</strong></div>
+<div class="stat"><small>Stok tersedia</small><strong id="statStock">0</strong></div>
+<div class="stat"><small>Stok menipis</small><strong id="statLow">0</strong></div>
+</div>
+<div class="card">
+<h2>🧾 Nota baru</h2>
+<div class="grid">
+<div class="field"><label>Nomor nota</label><input id="invoice" readonly></div>
+<div class="field"><label>Tanggal</label><input id="saleDate" readonly></div>
+<div class="field"><label>Nama pelanggan (opsional)</label><input id="customer" placeholder="Nama pelanggan"></div>
+<div class="field"><label>Petugas (opsional)</label><input id="cashier" placeholder="Nama kasir"></div>
+</div>
+<div id="saleLines"></div>
+<div class="actions no-print"><button class="primary" id="addLine">＋ Tambah barang</button><button id="clearSale">Kosongkan nota</button></div>
+<div class="summary">
+<div class="sumline"><span>Total barang</span><strong id="qtyTotal">0</strong></div>
+<div class="sumline big"><span>Total belanja</span><span id="saleTotal">Rp0</span></div>
+<div class="grid no-print" style="margin-top:12px">
+<div class="field"><label>Uang dibayar (Rp)</label><input id="payment" type="number" min="0" step="1" placeholder="0"></div>
+<div class="field"><label>Kembalian</label><input id="change" readonly value="Rp0"></div>
+</div>
+<div class="sumline"><span>Status</span><strong id="payStatus">Belum dibayar</strong></div>
+</div>
+<div class="actions no-print"><button class="primary" id="saveSale">💾 Simpan transaksi & kurangi stok</button><button id="printSale">🖨️ Cetak / PDF</button></div>
+<p class="muted" id="saleMessage" aria-live="polite"></p>
+<p class="muted">Stok dikurangi hanya setelah transaksi berhasil disimpan. Pastikan barang dan jumlah sudah benar.</p>
+</div>
+</section>
+<section id="stockView" class="hidden">
+<div class="card">
+<h2>📦 Tambah / edit barang</h2>
+<input type="hidden" id="editId">
+<div class="grid">
+<div class="field"><label>Nama barang</label><input id="pName" placeholder="Contoh: Air mineral"></div>
+<div class="field"><label>Kode barang (opsional)</label><input id="pCode" placeholder="SKU-001"></div>
+<div class="field"><label>Harga modal (Rp)</label><input id="pCost" type="number" min="0" step="1" placeholder="0"></div>
+<div class="field"><label>Harga jual (Rp)</label><input id="pPrice" type="number" min="0" step="1" placeholder="0"></div>
+<div class="field"><label>Stok awal / stok saat ini</label><input id="pStock" type="number" min="0" step="1" placeholder="0"></div>
+<div class="field"><label>Peringatan jika stok ≤</label><input id="pMin" type="number" min="0" step="1" value="5"></div>
+</div>
+<div class="actions"><button class="primary" id="saveProduct">Simpan barang</button><button id="cancelEdit">Batal edit</button></div>
+<p class="muted">Untuk menambah persediaan barang yang sudah ada, gunakan tombol Restok pada daftar barang.</p>
+</div>
+<div class="card"><h2>Daftar stok & sisa barang</h2><div class="field"><label>Cari barang</label><input id="searchProduct" placeholder="Ketik nama atau kode barang"></div><div id="productsTable"></div></div>
+</section>
+<section id="historyView" class="hidden">
+<div class="card"><h2>📚 Riwayat transaksi</h2><div class="actions no-print"><button id="exportCsv">Unduh riwayat CSV</button><button class="danger" id="clearHistory">Hapus riwayat</button></div><div id="historyTable"></div></div>
+</section>
+<section id="settingsView" class="hidden">
+<div class="card"><h2>⚙️ Pengaturan toko</h2><div class="field"><label>Nama toko</label><input id="storeName" placeholder="Nama toko kamu"></div><div class="field"><label>Alamat / keterangan nota (opsional)</label><input id="storeInfo" placeholder="Alamat atau nomor telepon"></div><button class="primary full" id="saveSettings">Simpan pengaturan</button></div>
+<div class="card"><h2>💾 Cadangan data</h2><p class="muted">Simpan file cadangan agar data bisa dipindahkan atau dipulihkan. Data versi ini tersimpan di browser/perangkat ini saja.</p><div class="actions"><button id="backup">Unduh cadangan</button><label class="primary" style="text-align:center;padding:11px;border-radius:10px;cursor:pointer">Pulihkan cadangan<input id="restore" type="file" accept="application/json" style="display:none"></label></div><div class="notice">Penting: versi ini menyimpan data lokal di browser. Dua orang di HP berbeda belum otomatis berbagi stok/riwayat. Untuk data bersama diperlukan database online dan aturan akses yang aman.</div></div>
+</section>
+</main>
+<footer>NOTAKU · Data tersimpan lokal pada browser ini</footer>
+<script>
+const $=id=>document.getElementById(id);
+const KEY='notaku_v1_data';
+const blank=()=>({products:[],sales:[],settings:{storeName:'NOTAKU',storeInfo:''}});
+let db=loadDb(), lines=[];
+function loadDb(){try{return {...blank(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return blank()}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(db));return true}catch{alert('Penyimpanan browser penuh. Unduh cadangan dan kosongkan ruang.');return false}}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function money(n){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0)}
+function safe(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function dateStr(d=new Date()){return d.toLocaleString('id-ID')}
+function newInvoice(){return 'NT-'+Date.now().toString().slice(-8)}
+function setNewSale(){ $('invoice').value=newInvoice();$('saleDate').value=dateStr();$('payment').value='';$('customer').value='';$('cashier').value='';lines=[];addSaleLine();calcSale()}
+function goTab(id){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));['saleView','stockView','historyView','settingsView'].forEach(v=>$(v).classList.toggle('hidden',v!==id));if(id==='stockView')renderProducts();if(id==='historyView')renderHistory()}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>goTab(b.dataset.tab)));
+function addSaleLine(productId=''){lines.push({productId,qty:1});renderSaleLines()}
+function renderSaleLines(){const box=$('saleLines');box.innerHTML='';if(!db.products.length){box.innerHTML='<div class="notice">Belum ada barang. Buka tab Stok Barang untuk menambahkan produk terlebih dahulu.</div>';return}
+lines.forEach((line,i)=>{const p=db.products.find(x=>x.id===line.productId);const row=document.createElement('div');row.className='product-row';row.innerHTML=`<div class="field"><label>Barang</label><select data-i="${i}" class="pick"><option value="">Pilih barang…</option>${db.products.map(p=>`<option value="${p.id}" ${p.id===line.productId?'selected':''}>${safe(p.name)} — stok ${p.stock}</option>`).join('')}</select><div class="muted price-label">${p?'Harga: '+money(p.price)+' · Sisa stok: '+p.stock:'Pilih barang dari daftar stok'}</div></div><div class="field"><label>Jumlah</label><input class="qty" data-i="${i}" type="number" min="1" step="1" value="${line.qty}"></div><div class="field price-label"><label>Subtotal</label><div class="money" style="padding:11px 0">${money(p?p.price*line.qty:0)}</div><button class="danger removeLine no-print" data-i="${i}" style="margin-top:5px">Hapus</button></div>`;box.appendChild(row)});
+box.querySelectorAll('.pick').forEach(el=>el.addEventListener('change',e=>{lines[+e.target.dataset.i].productId=e.target.value;calcSale();renderSaleLines()}));
+box.querySelectorAll('.qty').forEach(el=>el.addEventListener('input',e=>{lines[+e.target.dataset.i].qty=Number(e.target.value);calcSale()}));
+box.querySelectorAll('.removeLine').forEach(el=>el.addEventListener('click',e=>{lines.splice(+e.target.dataset.i,1);renderSaleLines();calcSale()}))}
+function saleCalc(){let total=0,qty=0,valid=true;const selected=[];for(const l of lines){if(!l.productId)continue;const p=db.products.find(x=>x.id===l.productId);if(!p)continue;const q=Number(l.qty);if(!Number.isSafeInteger(q)||q<1||q>p.stock)valid=false;total+=p.price*(Number.isFinite(q)&&q>0?q:0);qty+=Number.isFinite(q)&&q>0?q:0;selected.push({p,q})}return{total,qty,valid,selected}}
+function calcSale(){const c=saleCalc();$('qtyTotal').textContent=c.qty;$('saleTotal').textContent=money(c.total);const pay=Math.max(0,Number($('payment').value)||0);$('change').value=money(Math.max(0,pay-c.total));$('payStatus').textContent=c.total>0&&pay>=c.total?'Lunas':pay>0?'Belum lunas':'Belum dibayar';}
+$('addLine').onclick=()=>{if(!db.products.length){goTab('stockView');return}addSaleLine()};
+$('clearSale').onclick=()=>{if(confirm('Kosongkan nota saat ini?'))setNewSale()};
+$('payment').addEventListener('input',calcSale);
+$('saveSale').onclick=()=>{const c=saleCalc(),pay=Number($('payment').value)||0;if(!c.selected.length){$('saleMessage').textContent='Pilih setidaknya satu barang.';return}if(!c.valid){$('saleMessage').textContent='Jumlah harus bilangan bulat positif dan tidak boleh melebihi stok yang tersedia.';return}if(c.selected.some(x=>!Number.isSafeInteger(x.q)||x.q<1)){ $('saleMessage').textContent='Periksa jumlah barang.';return}if(pay<c.total){$('saleMessage').textContent='Uang pembayaran belum mencukupi total belanja.';return}
+for(const x of c.selected){if(x.p.stock<x.q){$('saleMessage').textContent='Stok tidak cukup untuk '+x.p.name;return}}
+const sale={invoice:$('invoice').value,date:new Date().toISOString(),customer:$('customer').value.trim(),cashier:$('cashier').value.trim(),store:db.settings.storeName||'NOTAKU',info:db.settings.storeInfo||'',items:c.selected.map(x=>({id:x.p.id,name:x.p.name,qty:x.q,price:x.p.price,cost:x.p.cost,subtotal:x.q*x.p.price})),total:c.total,payment:pay,change:pay-c.total};
+c.selected.forEach(x=>{x.p.stock-=x.q});db.sales.unshift(sale);if(!persist()){c.selected.forEach(x=>{x.p.stock+=x.q});db.sales.shift();return}
+$('saleMessage').textContent='Transaksi tersimpan; stok berhasil dikurangi.';renderStats();renderSaleLines();renderProducts();renderHistory();printSaleData=sale;setTimeout(()=>{if(confirm('Transaksi tersimpan. Cetak nota sekarang?'))printReceipt(sale)},100);setNewSale()};
+let printSaleData=null;
+$('printSale').onclick=()=>{const c=saleCalc();if(!c.selected.length){alert('Pilih barang terlebih dahulu.');return}const pay=Number($('payment').value)||0;printReceipt({invoice:$('invoice').value,date:new Date().toISOString(),customer:$('customer').value,cashier:$('cashier').value,store:db.settings.storeName,info:db.settings.storeInfo,items:c.selected.map(x=>({name:x.p.name,qty:x.q,price:x.p.price,subtotal:x.p.price*x.q})),total:c.total,payment:pay,change:Math.max(0,pay-c.total)})};
+function printReceipt(s){const w=window.open('','_blank','width=600,height=750');if(!w){alert('Browser memblokir jendela cetak. Izinkan pop-up lalu coba lagi.');return}w.document.write(`<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Nota ${safe(s.invoice)}</title><style>body{font:14px Arial;max-width:380px;margin:25px auto;color:#111}h2{text-align:center;margin-bottom:4px}.center{text-align:center}.line{display:flex;justify-content:space-between;gap:10px;margin:8px 0}.items{border-top:1px dashed #888;border-bottom:1px dashed #888;padding:8px 0}.item{margin:9px 0}.small{font-size:12px}.total{font-weight:bold;border-top:1px solid #333;padding-top:10px}</style></head><body><h2>${safe(s.store||'NOTAKU')}</h2><div class="center small">${safe(s.info||'')}</div><p class="center">NOTA PEMBELIAN</p><div class="line"><span>No. Nota</span><b>${safe(s.invoice)}</b></div><div class="line"><span>Tanggal</span><span>${safe(dateStr(new Date(s.date)))}</span></div><div class="line"><span>Pelanggan</span><span>${safe(s.customer||'-')}</span></div><div class="items">${s.items.map(x=>`<div class="item"><div>${safe(x.name)}</div><div class="line"><span>${x.qty} × ${money(x.price)}</span><b>${money(x.subtotal)}</b></div></div>`).join('')}</div><div class="line total"><span>TOTAL</span><span>${money(s.total)}</span></div><div class="line"><span>Dibayar</span><span>${money(s.payment)}</span></div><div class="line"><span>Kembalian</span><span>${money(s.change)}</span></div><p class="center">Terima kasih sudah berbelanja!</p><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()}
+$('saveProduct').onclick=()=>{const name=$('pName').value.trim(),code=$('pCode').value.trim(),cost=Number($('pCost').value)||0,price=Number($('pPrice').value),stock=Number($('pStock').value),min=Number($('pMin').value)||0,edit=$('editId').value;if(!name){alert('Nama barang wajib diisi.');return}if(!Number.isFinite(price)||price<0||!Number.isSafeInteger(stock)||stock<0||!Number.isSafeInteger(min)||min<0||cost<0){alert('Harga dan stok harus bernilai valid; stok berupa bilangan bulat ≥ 0.');return}if(db.products.some(p=>p.name.toLowerCase()===name.toLowerCase()&&p.id!==edit)){alert('Nama barang sudah ada. Edit barang yang sudah ada atau gunakan nama berbeda.');return}
+if(edit){const p=db.products.find(p=>p.id===edit);if(p)Object.assign(p,{name,code,cost,price,stock,min})}else db.products.push({id:id(),name,code,cost,price,stock,min});if(!persist())return;clearProductForm();renderProducts();renderSaleLines();renderStats()};
+function clearProductForm(){$('editId').value='';['pName','pCode','pCost','pPrice','pStock'].forEach(id=>$(id).value='');$('pMin').value=5;$('saveProduct').textContent='Simpan barang'}
+$('cancelEdit').onclick=clearProductForm;
+function editProduct(idv){const p=db.products.find(p=>p.id===idv);if(!p)return;$('editId').value=p.id;$('pName').value=p.name;$('pCode').value=p.code||'';$('pCost').value=p.cost;$('pPrice').value=p.price;$('pStock').value=p.stock;$('pMin').value=p.min;$('saveProduct').textContent='Simpan perubahan';window.scrollTo({top:0,behavior:'smooth'})}
+function restock(idv){const p=db.products.find(p=>p.id===idv);if(!p)return;const n=prompt('Jumlah stok yang ditambahkan untuk '+p.name+' (stok saat ini: '+p.stock+')');if(n===null)return;const q=Number(n);if(!Number.isSafeInteger(q)||q<=0){alert('Masukkan jumlah bulat lebih dari 0.');return}p.stock+=q;if(p.stock>Number.MAX_SAFE_INTEGER){p.stock-=q;alert('Jumlah terlalu besar.');return}if(persist()){renderProducts();renderSaleLines();renderStats()}}
+function deleteProduct(idv){const p=db.products.find(p=>p.id===idv);if(!p)return;if(db.sales.some(s=>s.items.some(i=>i.id===idv))){alert('Barang pernah masuk transaksi sehingga tidak dapat dihapus agar riwayat tetap utuh. Kamu bisa mengedit nama barang.');return}if(confirm('Hapus barang '+p.name+'?')){db.products=db.products.filter(x=>x.id!==idv);persist();renderProducts();renderSaleLines();renderStats()}}
+function renderProducts(){const q=$('searchProduct').value.toLowerCase(),ps=db.products.filter(p=>(p.name+' '+(p.code||'')).toLowerCase().includes(q));if(!ps.length){$('productsTable').innerHTML='<p class="muted">Belum ada barang yang cocok. Tambahkan barang menggunakan formulir di atas.</p>';return}
+$('productsTable').innerHTML='<div class="tablewrap"><table><thead><tr><th>Barang</th><th>Harga jual</th><th>Sisa stok</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+ps.map(p=>`<tr><td><b>${safe(p.name)}</b><br><span class="muted">${safe(p.code||'')}</span><br><span class="muted">Modal ${money(p.cost)}</span></td><td>${money(p.price)}</td><td><b>${p.stock}</b></td><td>${p.stock===0?'<span class="badge out">HABIS</span>':p.stock<=p.min?'<span class="badge low">MENIPIS</span>':'<span class="badge ok">TERSEDIA</span>'}</td><td><button data-edit="${p.id}">Edit</button> <button class="green" data-restock="${p.id}">Restok</button><br><button class="danger" data-del="${p.id}" style="margin-top:5px">Hapus</button></td></tr>`).join('')+'</tbody></table></div>';
+$('productsTable').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));$('productsTable').querySelectorAll('[data-restock]').forEach(b=>b.onclick=()=>restock(b.dataset.restock));$('productsTable').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>deleteProduct(b.dataset.del))}
+$('searchProduct').addEventListener('input',renderProducts);
+function renderStats(){$('statKinds').textContent=db.products.length;$('statStock').textContent=db.products.reduce((s,p)=>s+p.stock,0);$('statLow').textContent=db.products.filter(p=>p.stock<=p.min).length}
+function renderHistory(){if(!db.sales.length){$('historyTable').innerHTML='<p class="muted">Belum ada transaksi tersimpan di browser ini.</p>';return}$('historyTable').innerHTML='<div class="tablewrap"><table><thead><tr><th>Nota / Tanggal</th><th>Pelanggan / Kasir</th><th>Barang</th><th>Total</th><th>Aksi</th></tr></thead><tbody>'+db.sales.map((s,i)=>`<tr><td><b>${safe(s.invoice)}</b><br><span class="muted">${safe(dateStr(new Date(s.date)))}</span></td><td>${safe(s.customer||'-')}<br><span class="muted">${safe(s.cashier||'-')}</span></td><td>${s.items.map(x=>safe(x.name)+' × '+x.qty).join('<br>')}</td><td><b>${money(s.total)}</b></td><td><button data-reprint="${i}">Cetak</button></td></tr>`).join('')+'</tbody></table></div>';$('historyTable').querySelectorAll('[data-reprint]').forEach(b=>b.onclick=()=>printReceipt(db.sales[+b.dataset.reprint]))}
+$('clearHistory').onclick=()=>{if(!confirm('Hapus semua riwayat transaksi? Stok tidak akan dikembalikan.'))return;db.sales=[];persist();renderHistory()};
+$('exportCsv').onclick=()=>{const rows=[['Nomor Nota','Tanggal','Pelanggan','Kasir','Barang','Jumlah','Total','Dibayar','Kembalian']];db.sales.forEach(s=>s.items.forEach(i=>rows.push([s.invoice,s.date,s.customer,s.cashier,i.name,i.qty,s.total,s.payment,s.change])));const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('notaku-riwayat.csv',csv,'text/csv;charset=utf-8')};
+function download(name,content,type){const blob=new Blob([content],{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+$('saveSettings').onclick=()=>{db.settings.storeName=$('storeName').value.trim()||'NOTAKU';db.settings.storeInfo=$('storeInfo').value.trim();if(persist())alert('Pengaturan toko disimpan.')};
+$('backup').onclick=()=>download('notaku-cadangan.json',JSON.stringify(db,null,2),'application/json');
+$('restore').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const data=JSON.parse(await f.text());if(!Array.isArray(data.products)||!Array.isArray(data.sales)||!data.settings)throw Error();if(!confirm('Pulihkan cadangan? Data saat ini akan diganti.'))return;db=data;if(persist()){renderAll();alert('Cadangan berhasil dipulihkan.')}}catch{alert('File cadangan tidak valid.')}e.target.value=''};
+function renderAll(){ $('storeName').value=db.settings.storeName||'NOTAKU';$('storeInfo').value=db.settings.storeInfo||'';renderStats();renderProducts();renderHistory();renderSaleLines();calcSale()}
+setNewSale();renderAll();
+</script>
+</body>
+</html>
